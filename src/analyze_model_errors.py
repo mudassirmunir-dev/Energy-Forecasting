@@ -3,118 +3,102 @@
 # Roll No: PSEB-2026-010784
 # Date: 2026-11-18
 
-"""
-Analyze test-set prediction errors for the trained models.
-"""
-
 from pathlib import Path
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent
 
 PREDICTIONS_PATH = (
-    PROJECT_ROOT
-    / "outputs"
-    / "reports"
-    / "test_predictions.csv"
+    ROOT / "outputs" / "reports" / "test_predictions.csv"
 )
 
-FIGURES_DIR = PROJECT_ROOT / "outputs" / "figures"
-REPORTS_DIR = PROJECT_ROOT / "outputs" / "reports"
+REPORT_DIR = ROOT / "outputs" / "reports"
+FIGURE_DIR = ROOT / "outputs" / "figures"
 
 BEST_MODEL = "hist_gradient_boosting"
 
-FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-
 
 def load_predictions():
-    data = pd.read_csv(
+    print("Loading model predictions...")
+
+    df = pd.read_csv(
         PREDICTIONS_PATH,
         parse_dates=["timestamp"]
     )
 
-    data = data.sort_values("timestamp").reset_index(drop=True)
-
-    required = [
-        "timestamp",
-        "actual",
-        "persistence_baseline",
-        "random_forest",
-        "hist_gradient_boosting",
-    ]
-
-    missing = [column for column in required if column not in data.columns]
-
-    if missing:
-        raise ValueError(f"Missing prediction columns: {missing}")
-
-    return data
-
-
-def calculate_errors(data):
-    data = data.copy()
-
-    data["error"] = data["actual"] - data[BEST_MODEL]
-    data["absolute_error"] = data["error"].abs()
-
-    data["month"] = data["timestamp"].dt.strftime("%Y-%m")
-    data["hour"] = data["timestamp"].dt.hour
-
-    return data
-
-
-def analyze_by_month(data):
-    monthly = data.groupby("month").agg(
-        samples=("actual", "size"),
-        MAE=("absolute_error", "mean"),
-        average_actual=("actual", "mean"),
-        average_prediction=(BEST_MODEL, "mean"),
+    # The model predicts consumption for the following hour.
+    df["target_timestamp"] = (
+        df["timestamp"] + pd.Timedelta(hours=1)
     )
 
-    monthly["MAE"] = monthly["MAE"].round(4)
-    monthly["average_actual"] = monthly["average_actual"].round(4)
-    monthly["average_prediction"] = monthly["average_prediction"].round(4)
+    df["error"] = (
+        df["actual"] - df[BEST_MODEL]
+    )
 
-    output = REPORTS_DIR / "monthly_error_analysis.csv"
-    monthly.to_csv(output)
+    df["absolute_error"] = df["error"].abs()
+
+    df["target_month"] = (
+        df["target_timestamp"].dt.to_period("M")
+    )
+
+    df["target_hour"] = (
+        df["target_timestamp"].dt.hour
+    )
+
+    return df
+
+
+def analyze_monthly_errors(df):
+    monthly = (
+        df.groupby("target_month")
+        .agg(
+            samples=("absolute_error", "count"),
+            MAE=("absolute_error", "mean"),
+            average_actual=("actual", "mean"),
+            average_prediction=(BEST_MODEL, "mean"),
+        )
+        .round(4)
+    )
 
     print("\n--- Monthly Error Analysis ---")
-    print(monthly.to_string())
-    print(f"Saved: {output}")
+    print(monthly)
 
-    return monthly
-
-
-def analyze_by_hour(data):
-    hourly = data.groupby("hour").agg(
-        samples=("actual", "size"),
-        MAE=("absolute_error", "mean"),
-        average_actual=("actual", "mean"),
-        average_prediction=(BEST_MODEL, "mean"),
+    monthly.to_csv(
+        REPORT_DIR / "monthly_error_analysis.csv"
     )
 
-    hourly["MAE"] = hourly["MAE"].round(4)
-    hourly["average_actual"] = hourly["average_actual"].round(4)
-    hourly["average_prediction"] = hourly["average_prediction"].round(4)
 
-    output = REPORTS_DIR / "hourly_error_analysis.csv"
-    hourly.to_csv(output)
+def analyze_hourly_errors(df):
+    hourly = (
+        df.groupby("target_hour")
+        .agg(
+            samples=("absolute_error", "count"),
+            MAE=("absolute_error", "mean"),
+            average_actual=("actual", "mean"),
+            average_prediction=(BEST_MODEL, "mean"),
+        )
+        .round(4)
+    )
 
     print("\n--- Hourly Error Analysis ---")
-    print(hourly.to_string())
-    print(f"Saved: {output}")
+    print(hourly)
 
-    return hourly
+    hourly.to_csv(
+        REPORT_DIR / "hourly_error_analysis.csv"
+    )
 
 
-def save_largest_errors(data):
-    largest = data.nlargest(20, "absolute_error")[
+def analyze_largest_errors(df):
+    largest = df.nlargest(
+        20,
+        "absolute_error"
+    )[
         [
-            "timestamp",
+            "target_timestamp",
             "actual",
             BEST_MODEL,
             "error",
@@ -122,120 +106,171 @@ def save_largest_errors(data):
         ]
     ].copy()
 
-    largest = largest.round(4)
+    numeric_columns = [
+        "actual",
+        BEST_MODEL,
+        "error",
+        "absolute_error",
+    ]
 
-    output = REPORTS_DIR / "largest_prediction_errors.csv"
-    largest.to_csv(output, index=False)
+    largest[numeric_columns] = (
+        largest[numeric_columns].round(4)
+    )
 
     print("\n--- 20 Largest Prediction Errors ---")
     print(largest.to_string(index=False))
-    print(f"Saved: {output}")
+
+    largest.to_csv(
+        REPORT_DIR / "largest_prediction_errors.csv",
+        index=False
+    )
 
 
-def create_plots(data, monthly):
-    # Actual vs predicted over the test period.
-    plt.figure(figsize=(14, 5))
-    plt.plot(
-        data["timestamp"],
-        data["actual"],
-        label="Actual",
-        linewidth=1
+def create_visualizations(df):
+    sns.set_theme(style="whitegrid")
+
+    # Actual vs predicted
+    plt.figure(figsize=(10, 6))
+
+    sns.scatterplot(
+        data=df,
+        x="actual",
+        y=BEST_MODEL,
+        alpha=0.5
     )
+
+    minimum = min(df["actual"].min(), df[BEST_MODEL].min())
+    maximum = max(df["actual"].max(), df[BEST_MODEL].max())
+
     plt.plot(
-        data["timestamp"],
-        data[BEST_MODEL],
-        label="Predicted",
-        linewidth=1
+        [minimum, maximum],
+        [minimum, maximum],
+        linestyle="--",
+        label="Perfect prediction"
     )
-    plt.title("Actual vs Predicted Electricity Consumption")
-    plt.xlabel("Timestamp")
-    plt.ylabel("Electricity Consumption")
+
+    plt.xlabel("Actual Consumption")
+    plt.ylabel("Predicted Consumption")
+    plt.title("Actual vs Predicted Consumption")
     plt.legend()
     plt.tight_layout()
 
     plt.savefig(
-        FIGURES_DIR / "actual_vs_predicted.png",
-        dpi=150
+        FIGURE_DIR / "actual_vs_predicted.png",
+        dpi=300
     )
     plt.close()
 
-    # Residual distribution.
-    plt.figure(figsize=(9, 5))
-    plt.hist(data["error"], bins=40, edgecolor="black")
-    plt.axvline(0, linestyle="--", linewidth=1)
+    # Error distribution
+    plt.figure(figsize=(10, 6))
+
+    sns.histplot(
+        data=df,
+        x="error",
+        bins=40,
+        kde=True
+    )
+
+    plt.axvline(0, linestyle="--")
+
+    plt.xlabel("Prediction Error (Actual - Predicted)")
     plt.title("Prediction Error Distribution")
-    plt.xlabel("Error (Actual - Predicted)")
-    plt.ylabel("Frequency")
     plt.tight_layout()
 
     plt.savefig(
-        FIGURES_DIR / "prediction_error_distribution.png",
-        dpi=150
+        FIGURE_DIR / "prediction_error_distribution.png",
+        dpi=300
     )
     plt.close()
 
-    # Monthly MAE.
-    plt.figure(figsize=(11, 5))
-    plt.bar(monthly.index.astype(str), monthly["MAE"])
-    plt.title("Monthly Prediction Error (MAE)")
-    plt.xlabel("Month")
-    plt.ylabel("Mean Absolute Error")
+    # Monthly MAE
+    monthly = (
+        df.groupby("target_month")["absolute_error"]
+        .mean()
+        .reset_index()
+    )
+
+    monthly["target_month"] = (
+        monthly["target_month"].astype(str)
+    )
+
+    plt.figure(figsize=(10, 6))
+
+    sns.barplot(
+        data=monthly,
+        x="target_month",
+        y="absolute_error"
+    )
+
     plt.xticks(rotation=45)
+    plt.xlabel("Target Month")
+    plt.ylabel("MAE")
+    plt.title("Monthly Prediction Error")
     plt.tight_layout()
 
     plt.savefig(
-        FIGURES_DIR / "monthly_prediction_error.png",
-        dpi=150
+        FIGURE_DIR / "monthly_prediction_error.png",
+        dpi=300
     )
     plt.close()
 
-    print("\nPlots saved:")
-    print("outputs/figures/actual_vs_predicted.png")
-    print("outputs/figures/prediction_error_distribution.png")
-    print("outputs/figures/monthly_prediction_error.png")
+    print("\nUpdated plots saved.")
 
 
-def save_summary(data, monthly, hourly):
-    summary = [
-        "MODEL ERROR ANALYSIS",
-        "=" * 45,
-        f"Model: {BEST_MODEL}",
-        f"Test samples: {len(data):,}",
-        f"Overall MAE: {data['absolute_error'].mean():.4f}",
-        f"Mean error (bias): {data['error'].mean():.4f}",
-        f"Maximum absolute error: {data['absolute_error'].max():.4f}",
-        "",
-        "Worst month by MAE:",
-        monthly["MAE"].idxmax(),
-        f"MAE: {monthly['MAE'].max():.4f}",
-        "",
-        "Worst hour by MAE:",
-        str(hourly["MAE"].idxmax()),
-        f"MAE: {hourly['MAE'].max():.4f}",
-        "",
-        "Interpretation:",
-        "Positive error means the model underpredicted.",
-        "Negative error means the model overpredicted.",
-    ]
+def save_summary(df):
+    mae = df["absolute_error"].mean()
+    rmse = (df["error"].pow(2).mean()) ** 0.5
+    bias = df["error"].mean()
 
-    output = REPORTS_DIR / "error_analysis_summary.txt"
-    output.write_text("\n".join(summary), encoding="utf-8")
+    summary = f"""
+MODEL ERROR ANALYSIS SUMMARY
+============================
 
-    print(f"\nSummary saved: {output}")
+Model: {BEST_MODEL}
+
+Total test predictions: {len(df)}
+
+MAE: {mae:.4f}
+RMSE: {rmse:.4f}
+Mean Error (Actual - Predicted): {bias:.4f}
+
+Positive error means underprediction.
+Negative error means overprediction.
+
+IMPORTANT:
+Errors are grouped using target_timestamp,
+not the input timestamp.
+
+Forecasting setup:
+One-step-ahead predictions using actual
+recent consumption readings as historical inputs.
+"""
+
+    output_path = (
+        REPORT_DIR / "error_analysis_summary.txt"
+    )
+
+    output_path.write_text(
+        summary,
+        encoding="utf-8"
+    )
+
+    print("\n" + summary)
+    print(f"Summary saved: {output_path}")
 
 
 def main():
-    print("Loading model predictions...")
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURE_DIR.mkdir(parents=True, exist_ok=True)
 
-    data = load_predictions()
-    data = calculate_errors(data)
+    df = load_predictions()
 
-    monthly = analyze_by_month(data)
-    hourly = analyze_by_hour(data)
+    analyze_monthly_errors(df)
+    analyze_hourly_errors(df)
+    analyze_largest_errors(df)
 
-    save_largest_errors(data)
-    create_plots(data, monthly)
-    save_summary(data, monthly, hourly)
+    create_visualizations(df)
+    save_summary(df)
 
     print("\nERROR ANALYSIS COMPLETED")
 
