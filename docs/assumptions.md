@@ -29,3 +29,22 @@
 - Missing weather values will not automatically be replaced with zero.
 - Special values such as -1 in precipitation fields require investigation.
 - Cleaning decisions will be documented before model training.
+
+
+## Electricity Building Selection
+
+After removing two completely empty columns, 1,576 building columns remained.
+
+Missing-value analysis identified:
+
+- 1,474 buildings with less than 20% missing readings.
+- 40 buildings with 20–50% missing readings.
+- 62 buildings with more than 50% missing readings.
+
+### Selection Rule
+
+For the initial modelling dataset, buildings with less than 20% missing readings will be retained.
+
+Buildings with 20% or more missing readings will be excluded from the initial modelling dataset.
+
+This threshold is an initial project assumption and may be reviewed during further analysis.
