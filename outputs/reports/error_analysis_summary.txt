@@ -1,0 +1,19 @@
+MODEL ERROR ANALYSIS
+=============================================
+Model: hist_gradient_boosting
+Test samples: 3,476
+Overall MAE: 5.0928
+Mean error (bias): 0.0996
+Maximum absolute error: 109.5374
+
+Worst month by MAE:
+2017-09
+MAE: 5.8763
+
+Worst hour by MAE:
+19
+MAE: 7.5830
+
+Interpretation:
+Positive error means the model underpredicted.
+Negative error means the model overpredicted.

@@ -12,7 +12,20 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+# ==========================================
+# LARGE DATASETS - KEEP LOCALLY, NOT ON GITHUB
+# ==========================================
+data/raw/
 
+# Large intermediate datasets
+data/cleaned/electricity.csv
+data/cleaned/electricity_selected.csv
+
+# ==========================================
+# TRAINED MODEL FILES - REGENERATE LOCALLY
+# ==========================================
+models/*.joblib
+models/*.pkl
 # ==========================================
 # JUPYTER NOTEBOOKS
 # ==========================================
@@ -25,33 +38,7 @@ __pycache__/
 .env.*
 !.env.example
 
-# ==========================================
-# GENERATED MODEL FILES
-# ==========================================
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/*.keras
-models/*.pt
-models/*.pth
-models/*.onnx
 
-# ==========================================
-# RAW DATASETS
-# ==========================================
-data/raw/
-
-# ==========================================
-# GENERATED / PROCESSED DATA
-# ==========================================
-data/cleaned/
-data/processed/
-
-# ==========================================
-# GENERATED OUTPUTS
-# ==========================================
-outputs/figures/
-outputs/reports/
 
 # ==========================================
 # LOG FILES

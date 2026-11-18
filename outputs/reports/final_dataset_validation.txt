@@ -1,0 +1,56 @@
+FINAL DATASET VALIDATION REPORT
+=============================================
+Rows: 17376
+Columns: 19
+
+Data types:
+timestamp              datetime64[us]
+target_timestamp       datetime64[us]
+consumption_lag_1             float64
+consumption_lag_24            float64
+consumption_lag_168           float64
+rolling_mean_24               float64
+rolling_mean_168              float64
+hour                            int64
+day_of_week                     int64
+month                           int64
+day_of_month                    int64
+is_weekend                      int64
+weather_matched                 int64
+airTemperature                float64
+dewTemperature                float64
+windSpeed                     float64
+windDirection                 float64
+seaLvlPressure                float64
+target                        float64
+
+Missing values:
+timestamp                0
+target_timestamp         0
+consumption_lag_1        0
+consumption_lag_24       0
+consumption_lag_168      0
+rolling_mean_24          0
+rolling_mean_168         0
+hour                     0
+day_of_week              0
+month                    0
+day_of_month             0
+is_weekend               0
+weather_matched          0
+airTemperature           4
+dewTemperature           4
+windSpeed                4
+windDirection          442
+seaLvlPressure         202
+target                   0
+
+Validation checks:
+PASS: Expected row count
+PASS: Chronological order
+PASS: Unique timestamps
+PASS: Target timestamp alignment
+PASS: No missing target
+PASS: No negative target
+PASS: No duplicate rows
+PASS: No numeric conversion errors

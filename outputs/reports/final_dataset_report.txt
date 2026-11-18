@@ -1,0 +1,77 @@
+FINAL FORECASTING DATASET REPORT
+=============================================
+Building: Hog_lodging_Shonda
+Site: Hog
+Prediction task: Next-hour electricity consumption
+
+Rows: 17,376
+Columns: 19
+Features: 16
+Target: target
+
+First input timestamp: 2016-01-07 23:00:00
+Last input timestamp: 2017-12-31 22:00:00
+First target timestamp: 2016-01-08 00:00:00
+Last target timestamp: 2017-12-31 23:00:00
+
+Missing values by column:
+timestamp                0
+target_timestamp         0
+consumption_lag_1        0
+consumption_lag_24       0
+consumption_lag_168      0
+rolling_mean_24          0
+rolling_mean_168         0
+hour                     0
+day_of_week              0
+month                    0
+day_of_month             0
+is_weekend               0
+weather_matched          0
+airTemperature           4
+dewTemperature           4
+windSpeed                4
+windDirection          442
+seaLvlPressure         202
+target                   0
+
+Feature columns:
+consumption_lag_1
+consumption_lag_24
+consumption_lag_168
+rolling_mean_24
+rolling_mean_168
+hour
+day_of_week
+month
+day_of_month
+is_weekend
+weather_matched
+airTemperature
+dewTemperature
+windSpeed
+windDirection
+seaLvlPressure
+
+Weather features:
+airTemperature
+dewTemperature
+windSpeed
+windDirection
+seaLvlPressure
+
+Target statistics:
+count    17376.000000
+mean       108.797134
+std         22.398114
+min          0.000000
+25%         89.000000
+50%        104.000000
+75%        127.000000
+max        212.000000
+
+Important:
+- Weather missing values have not been imputed.
+- Imputation must be fitted on training data only.
+- Use chronological splitting, not random splitting.
+- Do not use timestamp columns as model features.

@@ -1,0 +1,2 @@
+Total Records,Invalid Timestamps,Duplicate Timestamps,Irregular Intervals,Missing Hourly Intervals,Shorter Intervals,First Timestamp,Last Timestamp,Expected Interval
+17544,0,0,0,0,0,2016-01-01 00:00:00,2017-12-31 23:00:00,1 hour
