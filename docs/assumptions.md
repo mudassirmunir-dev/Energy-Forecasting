@@ -48,3 +48,35 @@ For the initial modelling dataset, buildings with less than 20% missing readings
 Buildings with 20% or more missing readings will be excluded from the initial modelling dataset.
 
 This threshold is an initial project assumption and may be reviewed during further analysis.
+
+## Timestamp Validation
+
+The selected electricity dataset contains 17,544 hourly records covering 2016–2017.
+
+Timestamp validation identified:
+
+- Invalid timestamps: 0
+- Duplicate timestamps: 0
+- Irregular hourly intervals: 0
+- Missing hourly intervals: 0
+- Expected interval: 1 hour
+
+All timestamps are valid and consecutive.
+
+## Missing-Data Gap Analysis
+
+The 20 buildings with the highest missing percentages were investigated.
+
+The analysis identified different missing-data patterns:
+
+- Some buildings contain a small number of long continuous gaps.
+- Some buildings contain many separate missing periods.
+- The longest observed missing period was 3,351 consecutive hours.
+
+### Initial Missing-Data Treatment Assumptions
+
+- Short gaps of 1–3 hours may be considered for interpolation.
+- Gaps of 4–24 hours require further investigation.
+- Gaps longer than 24 hours will not automatically be imputed.
+- Missing readings will not automatically be replaced with zero.
+- All missing-data treatment decisions will be evaluated before model training.
