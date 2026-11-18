@@ -24,7 +24,6 @@ data/cleaned/electricity_selected.csv
 # ==========================================
 # TRAINED MODEL FILES - REGENERATE LOCALLY
 # ==========================================
-models/*.joblib
 models/*.pkl
 # ==========================================
 # JUPYTER NOTEBOOKS
