@@ -1,19 +1,82 @@
-# Virtual environment
-.venv/
 
-# Python cache
+# ==========================================
+# PYTHON VIRTUAL ENVIRONMENTS
+# ==========================================
+.venv/
+venv/
+env/
+
+# ==========================================
+# PYTHON CACHE FILES
+# ==========================================
 __pycache__/
 *.py[cod]
+*$py.class
 
-# Jupyter checkpoints
+# ==========================================
+# JUPYTER NOTEBOOKS
+# ==========================================
 .ipynb_checkpoints/
 
-# Environment variables
+# ==========================================
+# ENVIRONMENT VARIABLES / SECRETS
+# ==========================================
 .env
+.env.*
+!.env.example
 
-# Generated model files
+# ==========================================
+# GENERATED MODEL FILES
+# ==========================================
 models/*.pkl
 models/*.joblib
+models/*.h5
+models/*.keras
+models/*.pt
+models/*.pth
+models/*.onnx
 
-# Large raw datasets
+# ==========================================
+# RAW DATASETS
+# ==========================================
 data/raw/
+
+# ==========================================
+# GENERATED / PROCESSED DATA
+# ==========================================
+data/cleaned/
+data/processed/
+
+# ==========================================
+# GENERATED OUTPUTS
+# ==========================================
+outputs/figures/
+outputs/reports/
+
+# ==========================================
+# LOG FILES
+# ==========================================
+*.log
+logs/
+
+# ==========================================
+# IDE AND EDITOR FILES
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# OPERATING SYSTEM FILES
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# TEMPORARY FILES
+# ==========================================
+*.tmp
+*.bak
+*.temp
