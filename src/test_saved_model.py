@@ -118,9 +118,19 @@ def main():
 
     print("\n--- Sample Predictions ---")
 
-    print(
-        results.head(10).round(4).to_string(index=False)
-    )
+    # Round numeric columns only; preserve datetime values.
+    sample = results.head(10).copy()
+
+    numeric_columns = [
+        "actual",
+        "predicted",
+        "error",
+        "absolute_error",
+    ]
+
+    sample[numeric_columns] = sample[numeric_columns].round(4)
+
+    print(sample.to_string(index=False))
 
     print("\n--- Saved Model Evaluation ---")
 
